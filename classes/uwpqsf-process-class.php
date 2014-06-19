@@ -283,30 +283,32 @@ if(!class_exists('uwpqsfprocess')){
   }//end ajax	
 
   function uajax_result($arg, $id,$pagenumber,$getdata){
-    	$query = new WP_Query( $arg );
-	$html = '';
-		//print_r($query);	// The Loop
-	if ( $query->have_posts() ) {
-	  $html .= '<h1>'.__('Search Results :', 'UWPQSF' ).'</h1>';
-	   while ( $query->have_posts() ) {
-	        	$query->the_post();global $post;
-			$html .= '<article><header class="entry-header">'.get_the_post_thumbnail().'';
-			$html .= '<h1 class="entry-title"><a href="'.get_permalink().'" rel="bookmark">'.get_the_title().'</a></h1>';
-			$html .= '</header>';
-			$html .= '<div class="entry-summary">'.get_the_excerpt().'</div></article>';
-				
-		  }
-			$html .= $this->ajax_pagination($pagenumber,$query->max_num_pages, 4, $id,$getdata);
-		 } else {
-					$html .= __( 'Nothing Found', 'UWPQSF' );
+		$query = new WP_Query( $arg );
+		$html = '';
+			//print_r($query);	// The Loop
+		if ( $query->have_posts() ) {
+		  $html .= '<h1>'.__('Search Results :', 'UWPQSF' ).'</h1>';
+		   while ( $query->have_posts() ) {
+				$query->the_post(); global $post;
+				$result = apply_filters('uwpqsf_result_template', $output = '', $post);
+				if( empty($result) ){
+					$html .= '<article><header class="entry-header">'.get_the_post_thumbnail().'';
+					$html .= '<h1 class="entry-title"><a href="'.get_permalink().'" rel="bookmark">'.get_the_title().'</a></h1>';
+					$html .= '</header>';
+					$html .= '<div class="entry-summary">'.get_the_excerpt().'</div></article>';
+				} else { 
+					$html .= $result; 
 				}
-				/* Restore original Post Data */
-				wp_reset_postdata();
-				
+
+			}
+			$html .= $this->ajax_pagination($pagenumber,$query->max_num_pages, 4, $id,$getdata);
+		} else {
+			$html .= __( 'Nothing Found', 'UWPQSF' );
+		}
+/* Restore original Post Data */
+		wp_reset_postdata();
 		return $html;
-			
-		
-  }//end result	 
+	}//end result	 
 
   function ajax_pagination($pagenumber, $pages = '', $range = 4, $id,$getdata){
 	$showitems = ($range * 2)+1;  
